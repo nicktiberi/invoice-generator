@@ -1,11 +1,6 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue';
 
-  const currencyFormat = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-  });
-
   enum ViewMode {
     Invoice,
     Form
@@ -22,6 +17,11 @@
     unitCost: number;
     notes: string;
   };
+
+  const currencyFormat = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+  });
 
   let invoiceCache: InvoiceCache | undefined;
 
@@ -95,6 +95,10 @@
       logoUrl.value = '';
     }
   };
+
+  const removeLogo = () => {
+    logoUrl.value = '';
+  };
 </script>
 
 <template>
@@ -106,7 +110,12 @@
 
           <div class="mb-3">
             <label for="logo" class="form-label">Logo</label>
-            <input ref="logoInput" @change="handleLogoChange" type="file" class="form-control" id="logo">
+            <input v-if="!logoUrl" ref="logoInput" @change="handleLogoChange" type="file" class="form-control" id="logo">
+
+            <div v-if="logoUrl">
+              <img :src="logoUrl" class="d-block mb-3" height="150" />
+              <button @click="removeLogo" type="button" class="btn btn-danger">Remove Logo</button>
+            </div>
           </div>
 
           <div class="mb-3">
@@ -167,7 +176,7 @@
         </div>
 
         <div v-if="logoUrl" class="col text-end">
-          <img class="logo" :src="logoUrl" height="150" />
+          <img :src="logoUrl" height="150" />
         </div>
       </div>
 
