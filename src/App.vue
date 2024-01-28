@@ -46,7 +46,9 @@
   const notes = ref(invoiceCache ? invoiceCache.notes : '');
 
   const formattedDate = computed(() => date.value.toLocaleDateString('en-us'));
-  const formattedInvoiceNumber = computed(() => `${date.value.toISOString().substring(0, 10)}-${invoiceNumber.value}`);
+  const formattedInvoiceNumber = computed(() =>
+    `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate()}-${invoiceNumber.value}`
+  );
   const formattedBillFrom = computed(() => billFrom.value.replace(/\n/g, '<br />'));
   const formattedBillTo = computed(() => billTo.value.replace(/\n/g, '<br />'));
   const formattedUnitCost = computed(() => currencyFormat.format(unitCost.value));
