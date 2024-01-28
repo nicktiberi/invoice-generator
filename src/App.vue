@@ -12,6 +12,7 @@
   }
 
   type InvoiceCache = {
+    logoUrl: string;
     invoiceNumber: number;
     billFrom: string;
     billTo: string;
@@ -30,6 +31,9 @@
   }
 
   const viewMode = ref<ViewMode>(ViewMode.Invoice);
+
+  const logoInput = ref<HTMLInputElement | null>(null);
+  const logoUrl = ref(invoiceCache ? invoiceCache.logoUrl : '');
 
   const invoiceNumber = ref(invoiceCache ? invoiceCache.invoiceNumber : 1);
   const date = ref(new Date());
@@ -55,6 +59,7 @@
 
     if (newViewMode === ViewMode.Invoice) {
       const invoiceData = {
+        logoUrl: logoUrl.value,
         invoiceNumber: invoiceNumber.value,
         billFrom: billFrom.value,
         billTo: billTo.value,
@@ -70,6 +75,24 @@
 
     viewMode.value = newViewMode;
   };
+
+  const handleLogoChange = () => {
+    if (logoInput.value?.files?.length) {
+      const file = logoInput.value.files[0];
+      const fileReader = new FileReader();
+      fileReader.addEventListener(
+        'load',
+        () => {
+          if (typeof fileReader.result === 'string') {
+            logoUrl.value = fileReader.result;
+          }
+        }
+      );
+      fileReader.readAsDataURL(file);
+    } else {
+      logoUrl.value = '';
+    }
+  };
 </script>
 
 <template>
@@ -78,6 +101,11 @@
       <div v-if="viewMode === ViewMode.Form" class="row">
         <div class="col">
           <h1>Invoice Generator</h1>
+
+          <div class="mb-3">
+            <label for="logo" class="form-label">Logo</label>
+            <input ref="logoInput" @change="handleLogoChange" type="file" class="form-control" id="logo">
+          </div>
 
           <div class="mb-3">
             <label for="invoiceNumber" class="form-label">Invoice Number</label>
@@ -136,8 +164,8 @@
           </address>
         </div>
 
-        <div class="col text-end">
-          <img class="logo" src="./assets/eepf-logo.png" width="150" height="150" />
+        <div v-if="logoUrl" class="col text-end">
+          <img class="logo" :src="logoUrl" height="150" />
         </div>
       </div>
 
