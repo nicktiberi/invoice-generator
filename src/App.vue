@@ -1,27 +1,31 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue';
+  import { v4 as uuid } from 'uuid';
 
   enum ViewMode {
     Invoice,
     Form
   }
 
+  type Item = {
+    id: string;
+    name: string;
+    description: string;
+    quantity: number;
+    unitCost: number;
+  };
+
   type InvoiceCache = {
     logoUrl: string;
     invoiceNumber: number;
     billFrom: string;
     billTo: string;
-    item: string;
+    items: Item[];
     description: string;
     quantity: number;
     unitCost: number;
     notes: string;
   };
-
-  const currencyFormat = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-  });
 
   let invoiceCache: InvoiceCache | undefined;
 
@@ -39,11 +43,13 @@
   const date = ref(new Date());
   const billFrom = ref(invoiceCache ? invoiceCache.billFrom : '');
   const billTo = ref(invoiceCache ? invoiceCache.billTo : '');
-  const item = ref(invoiceCache ? invoiceCache.item : '');
-  const description = ref(invoiceCache ? invoiceCache.description : '');
-  const quantity = ref(invoiceCache ? invoiceCache.quantity : 0);
-  const unitCost = ref(invoiceCache ? invoiceCache.unitCost : 0);
   const notes = ref(invoiceCache ? invoiceCache.notes : '');
+
+  const items = ref(invoiceCache ? invoiceCache.items : []);
+  const itemName = ref('');
+  const itemDescription = ref('');
+  const itemQuantity = ref(0);
+  const itemUnitCost = ref(0);
 
   const formattedDate = computed(() => date.value.toLocaleDateString('en-us'));
   const formattedInvoiceNumber = computed(() =>
@@ -51,10 +57,19 @@
   );
   const formattedBillFrom = computed(() => billFrom.value.replace(/\n/g, '<br />'));
   const formattedBillTo = computed(() => billTo.value.replace(/\n/g, '<br />'));
-  const formattedUnitCost = computed(() => currencyFormat.format(unitCost.value));
-  const formattedTotal = computed(() => currencyFormat.format(quantity.value * unitCost.value));
   const formattedNotes = computed(() => notes.value.replace(/\n/g, '<br />'));
   const displayButtonText = computed(() => viewMode.value === ViewMode.Invoice ? 'Edit Invoice' : 'Generate Invoice');
+  const total = computed(() => items.value.reduce((result, item) => {
+    return result + (item.quantity * item.unitCost);
+  }, 0));
+
+  const formatCurrency = (value: number) => {
+    const currencyFormat = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    });
+    return currencyFormat.format(value);
+  };
 
   const toggleDisplay = () => {
     const newViewMode = viewMode.value === ViewMode.Form ? ViewMode.Invoice : ViewMode.Form;
@@ -65,10 +80,10 @@
         invoiceNumber: invoiceNumber.value,
         billFrom: billFrom.value,
         billTo: billTo.value,
-        item: item.value,
-        description: description.value,
-        quantity: quantity.value,
-        unitCost: unitCost.value,
+        items: items.value,
+        description: itemDescription.value,
+        quantity: itemQuantity.value,
+        unitCost: itemUnitCost.value,
         notes: notes.value
       }
 
@@ -99,6 +114,25 @@
   const removeLogo = () => {
     logoUrl.value = '';
   };
+
+  const addItem = () => {
+    items.value.push({
+      id: uuid(),
+      name: itemName.value,
+      description: itemDescription.value,
+      quantity: itemQuantity.value,
+      unitCost: itemUnitCost.value
+    });
+
+    itemName.value = '';
+    itemDescription.value = '';
+    itemQuantity.value = 0;
+    itemUnitCost.value = 0;
+  };
+
+  const removeItem = (item: Item) => {
+    items.value = items.value.filter((i) => i.id != item.id);
+  };
 </script>
 
 <template>
@@ -123,40 +157,94 @@
             <input v-model="invoiceNumber" type="number" class="form-control" id="invoiceNumber">
           </div>
 
-          <div class="mb-3">
-            <label for="billFrom" class="form-label">Bill From</label>
-            <textarea v-model="billFrom" class="form-control" id="billFrom" rows="4"></textarea>
-          </div>
+          <div class="row mb-3">
+            <div class="col">
+              <label for="billFrom" class="form-label">Bill From</label>
+              <textarea v-model="billFrom" class="form-control" id="billFrom" rows="4"></textarea>
+            </div>
 
-          <div class="mb-3">
-            <label for="billTo" class="form-label">Bill To</label>
-            <textarea v-model="billTo" class="form-control" id="billTo" rows="4"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label for="item" class="form-label">Item</label>
-            <input v-model="item" type="text" class="form-control" id="item">
-          </div>
-
-          <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <input v-model="description" type="text" class="form-control" id="description">
-          </div>
-
-          <div class="mb-3">
-            <label for="quantity" class="form-label">Quantity</label>
-            <input v-model="quantity" type="number" class="form-control" id="quantity">
-          </div>
-
-          <div class="mb-3">
-            <label for="unitCost" class="form-label">Unit Cost</label>
-            <input v-model="unitCost" type="number" class="form-control" id="unitCost">
+            <div class="col">
+              <label for="billTo" class="form-label">Bill To</label>
+              <textarea v-model="billTo" class="form-control" id="billTo" rows="4"></textarea>
+            </div>
           </div>
 
           <div class="mb-3">
             <label for="notes" class="form-label">Notes/Memo</label>
             <textarea v-model="notes" class="form-control" id="notes" rows="4"></textarea>
           </div>
+
+          <div class="row mt-5 mb-3">
+            <div class="col">
+              <table class="table">
+                <thead>
+                  <tr class="table-secondary">
+                    <th>
+                      Item
+                    </th>
+                    <th>
+                      Description
+                    </th>
+                    <th>
+                      Quantity
+                    </th>
+                    <th>
+                      Unit Cost
+                    </th>
+                    <th>
+                      Line Total
+                    </th>
+                    <th>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in items" :key="item.id">
+                    <td>
+                      {{ item.name }}
+                    </td>
+                    <td>
+                      {{ item.description }}
+                    </td>
+                    <td>
+                      {{ item.quantity }}
+                    </td>
+                    <td>
+                      {{ formatCurrency(item.unitCost) }}
+                    </td>
+                    <td>
+                      {{ formatCurrency(item.unitCost * item.quantity) }}
+                    </td>
+                    <td>
+                      <button @click="removeItem(item)" type="button" class="btn btn-danger btn-sm">Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col">
+              <label for="itemName" class="form-label">Item</label>
+              <input v-model="itemName" type="text" class="form-control" id="itemName">
+            </div>
+            <div class="col">
+              <label for="description" class="form-label">Description</label>
+              <input v-model="itemDescription" type="text" class="form-control" id="description">
+            </div>
+            <div class="col">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input v-model="itemQuantity" type="number" class="form-control" id="quantity">
+            </div>
+            <div class="col">
+              <label for="unitCost" class="form-label">Unit Cost</label>
+              <input v-model="itemUnitCost" type="number" class="form-control" id="unitCost">
+            </div>
+          </div>
+
+          <button @click="addItem" type="button" class="btn btn-success mb-5">Add Item</button>
         </div>
       </div>
 
@@ -213,7 +301,7 @@
                   Amount Due
                 </th>
                 <th scope="row">
-                  {{ formattedTotal }}
+                  {{ formatCurrency(total) }}
                 </th>
               </tr>
             </tbody>
@@ -244,21 +332,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="item in items" :key="item.id">
                 <td>
-                  {{ item }}
+                  {{ item.name }}
                 </td>
                 <td>
-                  {{ description }}
+                  {{ item.description }}
                 </td>
                 <td>
-                  {{ quantity }}
+                  {{ item.quantity }}
                 </td>
                 <td>
-                  {{ formattedUnitCost }}
+                  {{ formatCurrency(item.unitCost) }}
                 </td>
                 <td>
-                  {{ formattedTotal }}
+                  {{ formatCurrency(item.unitCost * item.quantity) }}
                 </td>
               </tr>
             </tbody>
@@ -280,7 +368,7 @@
                   Total
                 </th>
                 <th scope="row">
-                  {{ formattedTotal }}
+                  {{ formatCurrency(total) }}
                 </th>
               </tr>
             </tbody>
