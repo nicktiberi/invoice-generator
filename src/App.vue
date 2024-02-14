@@ -6,14 +6,14 @@ import ItemTable from './components/ItemTable.vue';
 import LogoInput from './components/LogoInput.vue';
 import TextArea from './components/TextArea.vue';
 import { formatCurrency, newLineToBr } from './utils';
-import type { InvoiceCache } from './types/InvoiceCache';
+import type { Invoice } from './types/Invoice';
 
 enum ViewMode {
   Invoice,
   Form
 }
 
-let invoiceCache: InvoiceCache | undefined;
+let invoiceCache: Invoice | undefined;
 const cache = localStorage.getItem('invoiceData');
 if (cache) {
   invoiceCache = JSON.parse(cache);
@@ -33,14 +33,14 @@ const editInvoice = () => {
 };
 
 const generateInvoice = () => {
-  const invoiceData = {
+  const invoiceData: Invoice = {
     logoUrl: logoUrl.value,
     invoiceNumber: invoiceNumber.value,
     billFrom: billFrom.value,
     billTo: billTo.value,
     items: items.value,
     notes: notes.value
-  }
+  };
 
   localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
 

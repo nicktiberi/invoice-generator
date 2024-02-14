@@ -1,6 +1,6 @@
 import type { Item } from "./Item";
 
-export type InvoiceCache = {
+export type Invoice = {
   logoUrl: string;
   invoiceNumber: number;
   billFrom: string;
