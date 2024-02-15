@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+
 import InputField from './components/InputField.vue';
 import ItemInput from './components/ItemInput.vue';
 import ItemTable from './components/ItemTable.vue';
 import LogoInput from './components/LogoInput.vue';
 import TextArea from './components/TextArea.vue';
 import { formatCurrency, newLineToBr } from './utils';
+
 import type { Invoice } from './types/Invoice';
 
 enum ViewMode {
@@ -47,13 +49,16 @@ const generateInvoice = () => {
   viewMode.value = ViewMode.Invoice;
 };
 
-const formattedInvoiceNumber = computed(() =>
-  `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate()}-${invoiceNumber.value}`
+const formattedInvoiceNumber = computed(
+  () =>
+    `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate()}-${invoiceNumber.value}`
 );
 
-const total = computed(() => items.value.reduce((result, item) => {
-  return result + (item.quantity * item.unitCost);
-}, 0));
+const total = computed(() =>
+  items.value.reduce((result, item) => {
+    return result + item.quantity * item.unitCost;
+  }, 0)
+);
 </script>
 
 <template>
@@ -68,21 +73,26 @@ const total = computed(() => items.value.reduce((result, item) => {
           </div>
 
           <div class="mb-3">
-            <InputField id="invoiceNumber" label="Invoice Number" v-model="invoiceNumber" type="text" />
+            <InputField
+              id="invoiceNumber"
+              v-model="invoiceNumber"
+              label="Invoice Number"
+              type="text"
+            />
           </div>
 
           <div class="row mb-3">
             <div class="col">
-              <TextArea id="billFrom" label="Bill From" v-model="billFrom" />
+              <TextArea id="billFrom" v-model="billFrom" label="Bill From" />
             </div>
 
             <div class="col">
-              <TextArea id="billTo" label="Bill To" v-model="billTo" />
+              <TextArea id="billTo" v-model="billTo" label="Bill To" />
             </div>
           </div>
 
           <div class="mb-3">
-            <TextArea id="notes" label="Notes/Memo" v-model="notes" />
+            <TextArea id="notes" v-model="notes" label="Notes/Memo" />
           </div>
 
           <div class="row mt-5 mb-3">
@@ -105,15 +115,16 @@ const total = computed(() => items.value.reduce((result, item) => {
     <div v-if="viewMode === ViewMode.Invoice">
       <div class="row mb-5 d-print-none">
         <div class="col">
-          <button type="button" @click="editInvoice" class="btn btn-primary btn-lg">Edit Invoice</button>
+          <button type="button" class="btn btn-primary btn-lg" @click="editInvoice">
+            Edit Invoice
+          </button>
         </div>
       </div>
 
       <div class="row">
         <div class="col">
           <h5 class="fw-bold">Bill From:</h5>
-          <address v-html="newLineToBr(billFrom)">
-          </address>
+          <address v-html="newLineToBr(billFrom)"></address>
         </div>
 
         <div v-if="logoUrl" class="col text-end">
@@ -126,33 +137,26 @@ const total = computed(() => items.value.reduce((result, item) => {
       <div class="row my-5">
         <div class="col">
           <h5 class="fw-bold">Bill To:</h5>
-          <address v-html="newLineToBr(billTo)">
-          </address>
+          <address v-html="newLineToBr(billTo)"></address>
         </div>
 
         <div class="col">
           <table class="table table-borderless">
             <tbody>
               <tr>
-                <th scope="row">
-                  Invoice #
-                </th>
+                <th scope="row">Invoice #</th>
                 <td>
                   {{ formattedInvoiceNumber }}
                 </td>
               </tr>
               <tr>
-                <th scope="row">
-                  Invoice Date
-                </th>
+                <th scope="row">Invoice Date</th>
                 <td>
                   {{ date.toLocaleDateString('en-us') }}
                 </td>
               </tr>
               <tr class="table-secondary">
-                <th scope="row">
-                  Amount Due
-                </th>
+                <th scope="row">Amount Due</th>
                 <th scope="row">
                   {{ formatCurrency(total) }}
                 </th>
@@ -178,9 +182,7 @@ const total = computed(() => items.value.reduce((result, item) => {
           <table class="table table-borderless">
             <tbody>
               <tr class="table-secondary">
-                <th scope="row">
-                  Total
-                </th>
+                <th scope="row">Total</th>
                 <th scope="row">
                   {{ formatCurrency(total) }}
                 </th>

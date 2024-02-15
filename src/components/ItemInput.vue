@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { v4 as uuid } from 'uuid';
+import { ref } from 'vue';
+
 import InputField from './InputField.vue';
-import type { Item } from '@/types/Item';
+
+import type { Item } from '../types/Item';
 
 const items = defineModel<Item[]>({ required: true });
 
@@ -30,18 +32,18 @@ const addItem = () => {
 <template>
   <div class="row mb-3">
     <div class="col">
-      <InputField id="itemName" label="Item" v-model="itemName" type="text" />
+      <InputField id="itemName" v-model="itemName" label="Item" type="text" />
     </div>
     <div class="col">
-      <InputField id="itemDescription" label="Description" v-model="itemDescription" type="text" />
+      <InputField id="itemDescription" v-model="itemDescription" label="Description" type="text" />
     </div>
     <div class="col">
-      <InputField id="itemQuantity" label="Quantity" v-model="itemQuantity" type="number" />
+      <InputField id="itemQuantity" v-model="itemQuantity" label="Quantity" type="number" />
     </div>
     <div class="col">
-      <InputField id="itemUnitCost" label="Unit Cost" v-model="itemUnitCost" type="number" />
+      <InputField id="itemUnitCost" v-model="itemUnitCost" label="Unit Cost" type="number" />
     </div>
   </div>
 
-  <button @click="addItem" type="button" class="btn btn-success mb-5">Add Item</button>
+  <button type="button" class="btn btn-success mb-5" @click="addItem">Add Item</button>
 </template>

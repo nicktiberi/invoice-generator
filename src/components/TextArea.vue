@@ -10,11 +10,6 @@ defineProps<{
 <template>
   <div class="col">
     <label :for="id" class="form-label">{{ label }}</label>
-    <textarea
-      v-model="value"
-      :id="id"
-      class="form-control"
-      rows="4"
-    ></textarea>
+    <textarea :id="id" v-model="value" class="form-control" rows="4"></textarea>
   </div>
 </template>
