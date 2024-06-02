@@ -6,7 +6,7 @@ import ItemInput from './components/ItemInput.vue';
 import ItemTable from './components/ItemTable.vue';
 import LogoInput from './components/LogoInput.vue';
 import TextArea from './components/TextArea.vue';
-import { formatCurrency, newLineToBr } from './utils';
+import { formatCurrency } from './utils';
 
 import type { Invoice } from './types/Invoice';
 
@@ -124,7 +124,7 @@ const total = computed(() =>
       <div class="row">
         <div class="col">
           <h5 class="fw-bold">Bill From:</h5>
-          <address v-html="newLineToBr(billFrom)"></address>
+          <address class="preserve-whitespace">{{ billFrom }}</address>
         </div>
 
         <div v-if="logoUrl" class="col text-end">
@@ -137,7 +137,7 @@ const total = computed(() =>
       <div class="row my-5">
         <div class="col">
           <h5 class="fw-bold">Bill To:</h5>
-          <address v-html="newLineToBr(billTo)"></address>
+          <address class="preserve-whitespace">{{ billTo }}</address>
         </div>
 
         <div class="col">
@@ -175,7 +175,7 @@ const total = computed(() =>
       <div class="row my-5">
         <div class="col">
           <h5 class="fw-bold">Notes/Memo</h5>
-          <p v-html="newLineToBr(notes)"></p>
+          <p class="preserve-whitespace">{{ notes }}</p>
         </div>
 
         <div class="col">

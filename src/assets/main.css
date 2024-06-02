@@ -1,1 +1,5 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
+
+.preserve-whitespace {
+  white-space: pre-wrap;
+}

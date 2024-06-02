@@ -5,5 +5,3 @@ export const formatCurrency = (value: number) => {
   });
   return currencyFormat.format(value);
 };
-
-export const newLineToBr = (value: string) => value.replace(/\n/g, '<br />');
