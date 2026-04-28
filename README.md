@@ -4,4 +4,4 @@ A simple invoice generator created using Vue.js and Bootstrap. Entered data is s
 
 ## Demo
 
-https://nt-invoice-generator.netlify.app
+https://nicktiberi.github.io/invoice-generator/demo/
